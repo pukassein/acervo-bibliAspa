@@ -410,9 +410,13 @@ export default function CatalogImporter() {
                      </div>
                      <div className="flex gap-4">
                         <div className="flex-1">
-                           <label className="text-[10px] uppercase font-bold text-ink-600">Categoria/Série</label>
-                           <input type="text" value={record.category || record.series || ''} onChange={e => handleRecordChange(record.id, 'category', e.target.value)} className="w-full border-b border-sand-300 pb-1 focus:border-terracotta-500 focus:outline-none" />
+                           <label className="text-[10px] uppercase font-bold text-ink-600">Categoria/Tags (separadas por vírgula)</label>
+                           <input type="text" value={record.category || ''} onChange={e => handleRecordChange(record.id, 'category', e.target.value)} className="w-full border-b border-sand-300 pb-1 focus:border-terracotta-500 focus:outline-none" />
                         </div>
+                     </div>
+                     <div>
+                        <label className="text-[10px] uppercase font-bold text-ink-600">Sinopse (PT-BR)</label>
+                        <textarea value={record.synopsis || ''} onChange={e => handleRecordChange(record.id, 'synopsis', e.target.value)} className="w-full border-b border-sand-300 pb-1 focus:border-terracotta-500 focus:outline-none mt-1 h-20 text-sm font-serif resize-y" />
                      </div>
                   </div>
 

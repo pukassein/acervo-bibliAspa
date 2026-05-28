@@ -109,11 +109,22 @@ export default function BookDetails() {
             </div>
           </div>
           
-          <div className="flex items-center justify-between mt-4">
+          <div className="flex items-start justify-between mt-4">
             <div>
-              <p className="font-sans text-[10px] uppercase tracking-[0.3em] font-bold text-ink-900 mb-4">Tags e Categorias</p>
+              <p className="font-sans text-[10px] uppercase tracking-[0.3em] font-bold text-ink-900 mb-4">Categoria</p>
+              <div className="flex flex-wrap gap-3 mb-6">
+                {book.categories.length > 0 && (
+                  <Link 
+                    to={`/browse?category=${book.categories[0]}`}
+                    className="inline-flex items-center border border-ink-900 bg-ink-900 text-white px-4 py-2 font-sans font-bold text-[10px] tracking-widest uppercase transition-colors"
+                  >
+                    {book.categories[0]}
+                  </Link>
+                )}
+              </div>
+              <p className="font-sans text-[10px] uppercase tracking-[0.3em] font-bold text-ink-900 mb-4">Tags</p>
               <div className="flex flex-wrap gap-3">
-                {book.categories.map((cat) => (
+                {book.categories.slice(1).map((cat) => (
                   <Link 
                     key={cat} 
                     to={`/browse?category=${cat}`}
@@ -122,8 +133,8 @@ export default function BookDetails() {
                     {cat}
                   </Link>
                 ))}
-                {book.categories.length === 0 && (
-                   <span className="text-xs text-ink-500 italic">Nenhuma tag cadastrada</span>
+                {book.categories.length <= 1 && (
+                   <span className="text-xs text-ink-500 italic">Nenhuma tag adicional</span>
                 )}
               </div>
             </div>
