@@ -10,6 +10,7 @@ export default function BookDetails() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     fetchBooks().then(books => {
       setAllBooks(books);
       const found = books.find((b) => b.id === id);

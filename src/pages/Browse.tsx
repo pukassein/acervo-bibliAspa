@@ -12,6 +12,7 @@ export default function Browse() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("All");
+  const [showTags, setShowTags] = useState(false);
 
   useEffect(() => {
     fetchBooks().then(setBooks);
@@ -174,40 +175,44 @@ export default function Browse() {
           </section>
 
           <section>
-            <div className="flex justify-between items-center mb-4">
-               <h3 className="text-[10px] uppercase tracking-[0.2em] text-ink-600 font-sans font-bold">Tags</h3>
+            <div className="flex justify-between items-center mb-4 cursor-pointer" onClick={() => setShowTags(!showTags)}>
+               <h3 className="text-[10px] uppercase tracking-[0.2em] text-ink-600 font-sans font-bold flex items-center gap-2">
+                 Tags {showTags ? "−" : "+"}
+               </h3>
             </div>
-            <div className="space-y-3">
-              {allTags.map(tag => {
-                const isSelected = selectedCategories.includes(tag);
-                return (
-                  <label key={tag} className="flex items-center justify-between text-sm cursor-pointer group">
-                    <div className="flex items-center space-x-3 flex-1 select-none text-ink-800">
-                      <div className={cn(
-                        "w-3 h-3 border border-ink-900 shrink-0 transition-colors",
-                        isSelected ? "bg-ink-900" : "bg-transparent group-hover:bg-sand-300"
-                      )}></div>
-                      <span className={cn("font-serif group-hover:italic transition-all", isSelected ? "font-bold text-ink-900 italic" : "")}>
-                        {tag}
+            {showTags && (
+              <div className="space-y-3">
+                {allTags.map(tag => {
+                  const isSelected = selectedCategories.includes(tag);
+                  return (
+                    <label key={tag} className="flex items-center justify-between text-sm cursor-pointer group">
+                      <div className="flex items-center space-x-3 flex-1 select-none text-ink-800">
+                        <div className={cn(
+                          "w-3 h-3 border border-ink-900 shrink-0 transition-colors",
+                          isSelected ? "bg-ink-900" : "bg-transparent group-hover:bg-sand-300"
+                        )}></div>
+                        <span className={cn("font-serif group-hover:italic transition-all", isSelected ? "font-bold text-ink-900 italic" : "")}>
+                          {tag}
+                        </span>
+                      </div>
+                      <span className="text-[10px] opacity-50 font-sans ml-2 shrink-0">
+                        {books.filter(b => b.categories.includes(tag)).length}
                       </span>
-                    </div>
-                    <span className="text-[10px] opacity-50 font-sans ml-2 shrink-0">
-                      {books.filter(b => b.categories.includes(tag)).length}
-                    </span>
-                    <input 
-                       type="checkbox" 
-                       className="hidden" 
-                       checked={isSelected}
-                       onChange={() => {
-                          setSelectedCategories(prev => 
-                             prev.includes(tag) ? prev.filter(c => c !== tag) : [...prev, tag]
-                          );
-                       }}
-                    />
-                  </label>
-                );
-              })}
-            </div>
+                      <input 
+                         type="checkbox" 
+                         className="hidden" 
+                         checked={isSelected}
+                         onChange={() => {
+                            setSelectedCategories(prev => 
+                               prev.includes(tag) ? prev.filter(c => c !== tag) : [...prev, tag]
+                            );
+                         }}
+                      />
+                    </label>
+                  );
+                })}
+              </div>
+            )}
           </section>
 
           <section>
