@@ -36,12 +36,6 @@ export function Navbar() {
               {link.name.split(" / ")[0]}
             </Link>
           ))}
-          <Link
-            to="/admin"
-            className="bg-ink-900 text-white px-2 py-1 flex items-center justify-center font-bold font-sans hover:bg-black transition-colors"
-          >
-            ADMINISTRAÇÃO
-          </Link>
         </nav>
         <button
           className="md:hidden text-ink-900 py-2 px-1"
@@ -68,13 +62,6 @@ export function Navbar() {
                 {link.name}
               </Link>
             ))}
-            <Link
-              to="/admin"
-              onClick={() => setIsOpen(false)}
-              className="mt-2 inline-block bg-ink-900 text-white px-4 py-2 border border-ink-900 self-start hover:bg-black transition-colors"
-            >
-              ADMINISTRAÇÃO
-            </Link>
           </div>
         </div>
       )}

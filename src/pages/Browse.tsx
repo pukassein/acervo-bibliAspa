@@ -10,7 +10,7 @@ export default function Browse() {
   
   const [books, setBooks] = useState<Book[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("All");
 
   useEffect(() => {
@@ -20,11 +20,11 @@ export default function Browse() {
   useEffect(() => {
     const cat = searchParams.get("category");
     if (cat) {
-      setSelectedCategory(cat);
+      setSelectedCategories([cat]);
     }
   }, [searchParams]);
 
-  const categories = ["All", ...Array.from(new Set(books.flatMap(b => b.categories)))];
+  const categories = Array.from(new Set(books.flatMap(b => b.categories)));
   const languages = ["All", ...Array.from(new Set(books.map(b => b.language)))];
 
   const filteredBooks = useMemo(() => {
@@ -36,12 +36,12 @@ export default function Browse() {
         book.author.toLowerCase().includes(searchLower) ||
         book.titleTransliteration.toLowerCase().includes(searchLower);
 
-      const matchesCategory = selectedCategory === "All" || book.categories.includes(selectedCategory);
+      const matchesCategory = selectedCategories.length === 0 || selectedCategories.some(cat => book.categories.includes(cat));
       const matchesLanguage = selectedLanguage === "All" || book.language === selectedLanguage;
 
       return matchesSearch && matchesCategory && matchesLanguage;
     });
-  }, [books, searchQuery, selectedCategory, selectedLanguage]);
+  }, [books, searchQuery, selectedCategories, selectedLanguage]);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -80,12 +80,19 @@ export default function Browse() {
           <div className="flex-1">
              <label className="text-[10px] uppercase tracking-[0.2em] text-ink-600 mb-2 block font-sans font-bold">Categoria</label>
              <select 
-               value={selectedCategory}
-               onChange={(e) => setSelectedCategory(e.target.value)}
+               value={selectedCategories.length === 0 ? "All" : selectedCategories[0]}
+               onChange={(e) => {
+                 if (e.target.value === "All") {
+                   setSelectedCategories([]);
+                 } else {
+                   setSelectedCategories([e.target.value]);
+                 }
+               }}
                className="w-full bg-transparent border-b border-ink-900 py-2 font-serif text-ink-900 focus:outline-none cursor-pointer"
              >
+               <option value="All">Ver Todas</option>
                {categories.map(cat => (
-                 <option key={cat} value={cat}>{cat === "All" ? "Ver Todas" : cat}</option>
+                 <option key={cat} value={cat}>{cat}</option>
                ))}
              </select>
           </div>
@@ -106,21 +113,43 @@ export default function Browse() {
         {/* Desktop Filters Sidebar */}
         <div className="hidden lg:block lg:w-64 flex-shrink-0 space-y-10">
           <section>
-            <h3 className="text-[10px] uppercase tracking-[0.2em] text-ink-600 mb-4 font-sans font-bold">Categoria</h3>
-            <ul className="space-y-3 text-sm">
-              {categories.map(cat => (
-                <li key={cat} className="flex justify-between items-center group cursor-pointer" onClick={() => setSelectedCategory(cat)}>
-                  <span className={cn("group-hover:italic font-serif", selectedCategory === cat ? "font-bold text-ink-900 italic" : "text-ink-800")}>
-                    {cat === "All" ? "Ver Todas" : cat}
-                  </span>
-                  {cat !== "All" && (
-                    <span className="text-[10px] opacity-50 font-sans">
+            <div className="flex justify-between items-center mb-4">
+               <h3 className="text-[10px] uppercase tracking-[0.2em] text-ink-600 font-sans font-bold">Categoria</h3>
+               {selectedCategories.length > 0 && (
+                  <button onClick={() => setSelectedCategories([])} className="text-[10px] uppercase tracking-widest text-terracotta-500 font-bold hover:text-terracotta-600 border-b border-terracotta-500">Limpar</button>
+               )}
+            </div>
+            <div className="space-y-3">
+              {categories.map(cat => {
+                const isSelected = selectedCategories.includes(cat);
+                return (
+                  <label key={cat} className="flex items-center justify-between text-sm cursor-pointer group">
+                    <div className="flex items-center space-x-3 flex-1 select-none text-ink-800">
+                      <div className={cn(
+                        "w-3 h-3 border border-ink-900 shrink-0 transition-colors",
+                        isSelected ? "bg-ink-900" : "bg-transparent group-hover:bg-sand-300"
+                      )}></div>
+                      <span className={cn("font-serif group-hover:italic transition-all", isSelected ? "font-bold text-ink-900 italic" : "")}>
+                        {cat}
+                      </span>
+                    </div>
+                    <span className="text-[10px] opacity-50 font-sans ml-2 shrink-0">
                       {books.filter(b => b.categories.includes(cat)).length}
                     </span>
-                  )}
-                </li>
-              ))}
-            </ul>
+                    <input 
+                       type="checkbox" 
+                       className="hidden" 
+                       checked={isSelected}
+                       onChange={() => {
+                          setSelectedCategories(prev => 
+                             prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+                          );
+                       }}
+                    />
+                  </label>
+                );
+              })}
+            </div>
           </section>
 
           <section>
@@ -161,7 +190,7 @@ export default function Browse() {
               <button 
                 onClick={() => {
                   setSearchQuery("");
-                  setSelectedCategory("All");
+                  setSelectedCategories([]);
                   setSelectedLanguage("All");
                 }}
                 className="text-xs uppercase tracking-widest font-bold text-ink-900 border-b border-ink-900 hover:text-terracotta-500 hover:border-terracotta-500 transition-colors font-sans"

@@ -1,9 +1,24 @@
+import { useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { BookOpen, Library, PlusCircle, Settings, LayoutDashboard, Printer, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function AdminLayout() {
   const location = useLocation();
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    sessionStorage.getItem("adminAuth") === "true"
+  );
+  const [password, setPassword] = useState("");
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password === "bibliaspaadmin") {
+      setIsAuthenticated(true);
+      sessionStorage.setItem("adminAuth", "true");
+    } else {
+      alert("Senha incorreta");
+    }
+  };
 
   const navItems = [
     { name: "Painel Principal", href: "/admin", icon: LayoutDashboard },
@@ -12,6 +27,26 @@ export function AdminLayout() {
     { name: "Imprimir Etiquetas", href: "/admin/print-labels", icon: Printer },
     { name: "Ver Acervo (Público)", href: "/browse", icon: Library },
   ];
+
+  if (!isAuthenticated) {
+     return (
+       <div className="flex items-center justify-center min-h-screen bg-sand-100 p-4">
+         <form onSubmit={handleLogin} className="bg-white p-8 border border-sand-300 shadow-xl max-w-sm w-full">
+            <h2 className="font-serif text-2xl text-ink-900 mb-6 font-bold text-center">Acesso Restrito</h2>
+            <div className="mb-4">
+               <label className="block text-[10px] uppercase tracking-widest font-bold text-ink-900 mb-2">Senha de Administração</label>
+               <input 
+                  type="password" 
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="w-full border border-sand-300 p-2 focus:outline-none focus:border-terracotta-500"
+               />
+            </div>
+            <button type="submit" className="w-full bg-ink-900 text-white p-3 text-xs uppercase tracking-widest font-bold hover:bg-black transition-colors">Entrar</button>
+         </form>
+       </div>
+     );
+  }
 
   return (
     <div className="flex min-h-screen bg-sand-100 flex-col md:flex-row">

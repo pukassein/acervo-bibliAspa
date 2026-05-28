@@ -14,6 +14,7 @@ interface ExtractedRecord {
   size: string;
   series: string;
   originalText: string;
+  synopsis: string;
   arabic_title: string;
   transliteration: string;
   author_arabic: string;
@@ -165,6 +166,7 @@ export default function CatalogImporter() {
           author: r.author || "",
           author_arabic: r.authorArabic || "",
           category: r.category && Array.isArray(r.category) ? r.category.join(", ") : (r.category || ""),
+          synopsis: r.synopsis || "",
           language: "Árabe",
           isbn: "",
           coverImage: "",
@@ -213,7 +215,8 @@ export default function CatalogImporter() {
             transliteration: enhanced.transliteration || r.transliteration,
             author_arabic: enhanced.authorArabic || r.author_arabic,
             author: enhanced.authorLatin || r.author,
-            category: (enhanced.categories && enhanced.categories.length > 0) ? enhanced.categories.join(", ") : r.category
+            category: (enhanced.categories && enhanced.categories.length > 0) ? enhanced.categories.join(", ") : r.category,
+            synopsis: enhanced.synopsis || r.synopsis
           };
         }
         return r;
@@ -263,7 +266,7 @@ export default function CatalogImporter() {
         series: r.series || "",
         size: r.size || "",
         categories: r.category ? r.category.split(",").map((c: string) => c.trim()).filter(Boolean) : [], 
-        synopsis: ""
+        synopsis: r.synopsis || r.originalText || ""
       }));
 
       const { error } = await supabase.from('books').insert(payload);
