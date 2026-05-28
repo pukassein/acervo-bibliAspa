@@ -1,0 +1,6 @@
+{
+  "name": "Maktaba - Arabic Community Library",
+  "description": "A digital catalog for an Arabic community library in São Paulo, featuring bilingual support and modern design.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

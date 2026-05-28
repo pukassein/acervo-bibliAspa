@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-sand-50: #FFFFFF;
+  --color-sand-100: #F5F2ED;
+  --color-sand-200: #E8E4DD;
+  --color-sand-300: #D4CFC7;
+  
+  --color-terracotta-500: #5A5A40;
+  --color-terracotta-600: #5A5A40;
+  
+  --color-ink-900: #1A1A1A;
+  --color-ink-800: #4A4A4A;
+  --color-ink-700: #7A7A7A;
+  --color-ink-600: #A09B93;
+  --color-ink-500: #A09B93;
+  
+  --color-olive-50: #F5F2ED;
+  --color-olive-100: #E8E4DD;
+  --color-olive-200: #D4CFC7;
+  --color-olive-700: #1A1A1A;
+  --color-olive-800: #1A1A1A;
+
+  --color-amber-500: #5A5A40;
+  --color-amber-600: #5A5A40;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Cormorant Garamond", ui-serif, Georgia, serif;
+  --font-arabic: "Amiri", "Cairo", serif;
+  --font-arabic-sans: "Cairo", "Inter", sans-serif;
+}
+
+body {
+  background-color: var(--color-sand-100);
+  color: var(--color-ink-900);
+  font-family: var(--font-serif);
+  -webkit-font-smoothing: antialiased;
+}
