@@ -1,6 +1,6 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Book, fetchBooks } from "@/data/mockBooks";
+import { Book, searchBooks, fetchMetadata } from "@/data/mockBooks";
 import { BookCard } from "@/components/ui/BookCard";
 import { Search, Filter, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -9,15 +9,32 @@ export default function Browse() {
   const [searchParams] = useSearchParams();
   
   const [books, setBooks] = useState<Book[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("All");
   const [showTags, setShowTags] = useState(false);
+  
+  const [currentPage, setCurrentPage] = useState(1);
+  const booksPerPage = 20;
 
+  // Metadata arrays
+  const [mainCategories, setMainCategories] = useState<string[]>([]);
+  const [allTags, setAllTags] = useState<string[]>([]);
+  const [languages, setLanguages] = useState<string[]>(["All"]);
+
+  // Fetch metadata once
   useEffect(() => {
-    fetchBooks().then(setBooks);
+    fetchMetadata().then((data) => {
+      setMainCategories(data.mainCategories as string[]);
+      setAllTags(data.allTags as string[]);
+      setLanguages(data.languages as string[]);
+    });
   }, []);
 
+  // Sync category from URL
   useEffect(() => {
     const cat = searchParams.get("category");
     if (cat) {
@@ -25,26 +42,30 @@ export default function Browse() {
     }
   }, [searchParams]);
 
-  const mainCategories = Array.from(new Set(books.map(b => b.categories[0]).filter(Boolean)));
-  const allTags = Array.from(new Set(books.flatMap(b => b.categories.slice(1)).filter(Boolean)));
-  const languages = ["All", ...Array.from(new Set(books.map(b => b.language)))];
-
-  const filteredBooks = useMemo(() => {
-    return books.filter((book) => {
-      const searchLower = searchQuery.toLowerCase();
-      const matchesSearch = 
-        book.translatedTitle.toLowerCase().includes(searchLower) ||
-        book.arabicTitle.toLowerCase().includes(searchLower) ||
-        book.author.toLowerCase().includes(searchLower) ||
-        book.titleTransliteration.toLowerCase().includes(searchLower);
-
-      // Check if it matches selected categories OR tags
-      const matchesCategory = selectedCategories.length === 0 || selectedCategories.some(cat => book.categories.includes(cat));
-      const matchesLanguage = selectedLanguage === "All" || book.language === selectedLanguage;
-
-      return matchesSearch && matchesCategory && matchesLanguage;
+  const loadBooks = useCallback(async () => {
+    setLoading(true);
+    const { books: fetchedBooks, totalCount: fetchedTotal } = await searchBooks({
+      page: currentPage,
+      limit: booksPerPage,
+      searchQuery,
+      categories: selectedCategories,
+      language: selectedLanguage
     });
-  }, [books, searchQuery, selectedCategories, selectedLanguage]);
+    setBooks(fetchedBooks);
+    setTotalCount(fetchedTotal);
+    setLoading(false);
+  }, [currentPage, booksPerPage, searchQuery, selectedCategories, selectedLanguage]);
+
+  useEffect(() => {
+    loadBooks();
+  }, [loadBooks]);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategories, selectedLanguage]);
+
+  const totalPages = Math.ceil(totalCount / booksPerPage);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -156,7 +177,7 @@ export default function Browse() {
                       </span>
                     </div>
                     <span className="text-[10px] opacity-50 font-sans ml-2 shrink-0">
-                      {books.filter(b => b.categories.includes(cat)).length}
+                      {/* Count removed since we now paginate on the server */}
                     </span>
                     <input 
                        type="checkbox" 
@@ -196,7 +217,7 @@ export default function Browse() {
                         </span>
                       </div>
                       <span className="text-[10px] opacity-50 font-sans ml-2 shrink-0">
-                        {books.filter(b => b.categories.includes(tag)).length}
+                        {/* Count removed */}
                       </span>
                       <input 
                          type="checkbox" 
@@ -221,6 +242,12 @@ export default function Browse() {
               {languages.map(lang => (
                 <label key={lang} className="flex items-center justify-between text-sm cursor-pointer group">
                   <div className="flex items-center space-x-3">
+                    <input 
+                      type="radio" 
+                      className="hidden" 
+                      checked={selectedLanguage === lang}
+                      onChange={() => setSelectedLanguage(lang)}
+                    />
                     <div className={cn(
                       "w-3 h-3 border border-ink-900",
                       selectedLanguage === lang ? "bg-ink-900" : "bg-transparent group-hover:bg-sand-300"
@@ -238,15 +265,50 @@ export default function Browse() {
         {/* Results Grid */}
         <div className="flex-1">
           <p className="text-[10px] text-ink-600 mb-6 font-bold uppercase tracking-widest font-sans">
-            Exibindo {filteredBooks.length} volume{filteredBooks.length !== 1 && 's'}
+            Exibindo {totalCount} volume{totalCount !== 1 && 's'}
           </p>
           
-          {filteredBooks.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredBooks.map((book) => (
-                <BookCard key={book.id} book={book} />
-              ))}
-            </div>
+          {loading ? (
+             <div className="flex flex-col items-center justify-center py-24 text-center">
+               <div className="w-8 h-8 border-4 border-ink-900 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+               <p className="text-ink-600 font-serif text-lg italic">Buscando no acervo...</p>
+             </div>
+          ) : totalCount > 0 ? (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                {books.map((book) => (
+                  <BookCard key={book.id} book={book} />
+                ))}
+              </div>
+              
+              {totalPages > 1 && (
+                <div className="flex justify-center items-center gap-2 border-t border-sand-300 pt-8">
+                  <button 
+                    onClick={() => {
+                      setCurrentPage(prev => Math.max(prev - 1, 1));
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 text-xs uppercase tracking-widest font-bold text-ink-900 border border-sand-300 hover:bg-sand-200 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+                  >
+                    Anterior
+                  </button>
+                  <span className="font-serif text-ink-600 text-sm mx-4">
+                    Página {currentPage} de {totalPages}
+                  </span>
+                  <button 
+                    onClick={() => {
+                      setCurrentPage(prev => Math.min(prev + 1, totalPages));
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    disabled={currentPage === totalPages}
+                    className="px-4 py-2 text-xs uppercase tracking-widest font-bold text-ink-900 border border-sand-300 hover:bg-sand-200 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+                  >
+                    Próxima
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
             <div className="flex flex-col items-center justify-center py-24 text-center border-y border-sand-300 bg-sand-200">
               <p className="text-ink-600 mb-4 font-serif text-lg italic">Nenhum livro encontrado com estes filtros.</p>
