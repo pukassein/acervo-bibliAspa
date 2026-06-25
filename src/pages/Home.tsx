@@ -17,7 +17,7 @@ export default function Home() {
       <section className="relative py-24 sm:py-32 border-b border-sand-300 overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-[0.06] pointer-events-none flex items-center justify-center">
             <img 
-               src="https://scontent.fbsb9-1.fna.fbcdn.net/v/t39.30808-6/484013488_1206920821433995_2659863590173208802_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeFW8KzUli1vnN8jqABv7DiIx-uSuoLSiQrH65K6gtKJCjJITe4W8dEJ-TeTXGqb9kPlUHe6gWOLkQoK6V6dIXoe&_nc_ohc=AAWhCpVj0LUQ7kNvwFFwbx6&_nc_oc=AdoaG7w1qbySw9-gmtN3T_17zxp1qsTdn7PmnfKgT6PkDXPoZS8NB14S21lb21lY_Ew&_nc_zt=23&_nc_ht=scontent.fbsb9-1.fna&_nc_gid=FIOOj4tx9cl-B6TrRB-zZA&_nc_ss=7b2a8&oh=00_Af5R1RwCp6aUijRSNXwMlCNBPOvlgO8oSVXJ26enPwW_TQ&oe=6A1D5B7F" 
+               src="https://jvfruuneqfgqvdztspid.supabase.co/storage/v1/object/public/images/bibliaspa%20logo.jpg" 
                alt="" 
                className="w-full h-full object-cover sm:object-contain sm:w-2/3 mix-blend-multiply" 
             />

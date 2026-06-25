@@ -17,7 +17,7 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b border-sand-300 bg-sand-100">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link to="/" className="flex items-center space-x-3 transition-opacity hover:opacity-80">
-          <img src="https://scontent.fbsb9-1.fna.fbcdn.net/v/t39.30808-6/484013488_1206920821433995_2659863590173208802_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeFW8KzUli1vnN8jqABv7DiIx-uSuoLSiQrH65K6gtKJCjJITe4W8dEJ-TeTXGqb9kPlUHe6gWOLkQoK6V6dIXoe&_nc_ohc=AAWhCpVj0LUQ7kNvwFFwbx6&_nc_oc=AdoaG7w1qbySw9-gmtN3T_17zxp1qsTdn7PmnfKgT6PkDXPoZS8NB14S21lb21lY_Ew&_nc_zt=23&_nc_ht=scontent.fbsb9-1.fna&_nc_gid=FIOOj4tx9cl-B6TrRB-zZA&_nc_ss=7b2a8&oh=00_Af5R1RwCp6aUijRSNXwMlCNBPOvlgO8oSVXJ26enPwW_TQ&oe=6A1D5B7F" alt="BibliASPA Logo" className="h-10 w-auto mix-blend-multiply" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+          <img src="https://jvfruuneqfgqvdztspid.supabase.co/storage/v1/object/public/images/bibliaspa%20logo.jpg" alt="BibliASPA Logo" className="h-10 w-auto mix-blend-multiply" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
           <div className="flex items-baseline space-x-3">
              <span className="text-2xl font-bold tracking-tighter uppercase text-ink-900 font-serif">BibliASPA</span>
              <span className="text-xs uppercase tracking-widest text-terracotta-500 border-l border-sand-300 pl-3">Acervo Literário</span>
