@@ -10,7 +10,7 @@ export default function Categories() {
     fetchBooks().then(setBooks);
   }, []);
 
-  const categories = Array.from(new Set(books.flatMap(b => b.categories)));
+  const categories = Array.from(new Set(books.flatMap(b => b.categories).filter(Boolean) as string[]));
 
   // Count books per category
   const categoryCounts = categories.map(cat => ({

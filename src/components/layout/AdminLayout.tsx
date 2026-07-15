@@ -1,19 +1,25 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { BookOpen, Library, PlusCircle, Settings, LayoutDashboard, Printer, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function AdminLayout() {
   const location = useLocation();
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    sessionStorage.getItem("adminAuth") === "true"
+  const [adminLevel, setAdminLevel] = useState<"full" | "normal" | null>(
+    (sessionStorage.getItem("adminLevel") as "full" | "normal" | null) || 
+    (sessionStorage.getItem("adminAuth") === "true" ? "normal" : null) // backward compatibility
   );
   const [password, setPassword] = useState("");
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === "bibliaspaadmin") {
-      setIsAuthenticated(true);
+    if (password === "husseinadmin") {
+      setAdminLevel("full");
+      sessionStorage.setItem("adminLevel", "full");
+      sessionStorage.setItem("adminAuth", "true");
+    } else if (password === "bibliaspaadmin") {
+      setAdminLevel("normal");
+      sessionStorage.setItem("adminLevel", "normal");
       sessionStorage.setItem("adminAuth", "true");
     } else {
       alert("Senha incorreta");
@@ -23,12 +29,12 @@ export function AdminLayout() {
   const navItems = [
     { name: "Painel Principal", href: "/admin", icon: LayoutDashboard },
     { name: "Adicionar Volume", href: "/admin/add-book", icon: PlusCircle },
-    { name: "Importar Catálogo", href: "/admin/import", icon: FileText },
+    ...(adminLevel === "full" ? [{ name: "Importar Catálogo", href: "/admin/import", icon: FileText }] : []),
     { name: "Imprimir Etiquetas", href: "/admin/print-labels", icon: Printer },
     { name: "Ver Acervo (Público)", href: "/browse", icon: Library },
   ];
 
-  if (!isAuthenticated) {
+  if (!adminLevel) {
      return (
        <div className="flex items-center justify-center min-h-screen bg-sand-100 p-4">
          <form onSubmit={handleLogin} className="bg-white p-8 border border-sand-300 shadow-xl max-w-sm w-full">

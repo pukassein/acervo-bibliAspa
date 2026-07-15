@@ -72,6 +72,9 @@ export default function AdminPrintLabels() {
         <style>
           {`
             @media print {
+              body, html {
+                background-color: white !important;
+              }
               body * {
                 visibility: hidden;
               }
@@ -83,6 +86,10 @@ export default function AdminPrintLabels() {
                 left: 0;
                 top: 0;
                 width: 100%;
+                background-color: white !important;
+              }
+              .label-card {
+                 background-color: white !important;
               }
               @page {
                 size: A4;
@@ -110,7 +117,7 @@ export default function AdminPrintLabels() {
 
         <div id="print-section" className="grid grid-cols-1 md:grid-cols-2 gap-8 gap-y-12 max-w-[210mm] mx-auto">
           {selectedBooksList.map((book) => (
-            <div key={book.id} className="border border-gray-400 p-6 sm:p-8 w-full font-serif text-[12px] sm:text-[13px] leading-relaxed relative" style={{ maxWidth: "100%", height: "200px" }}>
+            <div key={book.id} className="label-card bg-white border border-gray-400 p-6 sm:p-8 w-full font-serif text-[12px] sm:text-[13px] leading-relaxed relative" style={{ maxWidth: "100%", height: "200px" }}>
               <div className="mb-2">
                 {book.categories.join(" -- ")}
               </div>

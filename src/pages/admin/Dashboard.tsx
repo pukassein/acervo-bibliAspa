@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Search, Edit, Trash2, MoreVertical, X, Save, Loader2, Wand2 } from "lucide-react";
 import { Book, fetchBooks } from "@/data/mockBooks";
@@ -15,6 +15,7 @@ export default function AdminDashboard() {
   const [showApiModal, setShowApiModal] = useState(false);
   const [isEnrichingAi, setIsEnrichingAi] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const adminLevel = sessionStorage.getItem("adminLevel");
   const ITEMS_PER_PAGE = 20;
 
   useEffect(() => {
@@ -373,6 +374,7 @@ export default function AdminDashboard() {
             
             <div className="p-4 md:p-6 overflow-y-auto flex-1">
               <div className="flex flex-wrap gap-4 mb-6 pb-6 border-b border-sand-300">
+                {adminLevel === "full" && (
                 <button 
                   type="button"
                   onClick={handleAIEnrich} 
@@ -381,6 +383,7 @@ export default function AdminDashboard() {
                 >
                   {isEnrichingAi ? <Loader2 className="w-3.5 h-3.5 animate-spin"/> : <Wand2 className="w-3.5 h-3.5"/>} Preencher Titulo/Autor via IA
                 </button>
+                )}
                 <button 
                   type="button"
                   onClick={searchGoogleBooks} 

@@ -44,6 +44,7 @@ export default function AddBook() {
   });
 
   const [translationLoading, setTranslationLoading] = useState(false);
+  const adminLevel = sessionStorage.getItem("adminLevel");
 
   const autoEnrichAll = async () => {
     // Collect the current relevant data to send
@@ -454,6 +455,7 @@ export default function AddBook() {
       <form onSubmit={handleSubmit} className="space-y-10 bg-white p-6 md:p-10 border border-sand-300 shadow-sm">
         
         {/* IA Action Bar */}
+        {adminLevel === "full" && (
         <div className="bg-sand-100 p-4 border border-sand-300 flex flex-col sm:flex-row items-center justify-between gap-4">
            <div>
              <h3 className="font-sans text-[10px] uppercase tracking-[0.2em] font-bold text-ink-900 mb-1 flex items-center gap-1.5">
@@ -471,6 +473,7 @@ export default function AddBook() {
              Completar Campos
            </button>
         </div>
+        )}
 
         {/* Title Info */}
         <div className="space-y-6">
