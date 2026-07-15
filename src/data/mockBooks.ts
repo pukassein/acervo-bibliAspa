@@ -20,6 +20,7 @@ export interface Book {
   series?: string;
   size?: string;
   createdAt?: string;
+  needsVerification?: boolean;
 }
 
 export const mapSupabaseBook = (row: any): Book => ({
@@ -41,7 +42,8 @@ export const mapSupabaseBook = (row: any): Book => ({
   city: row.city || "",
   series: row.series || "",
   size: row.size || "",
-  createdAt: row.created_at || ""
+  createdAt: row.created_at || "",
+  needsVerification: row.needs_verification || false
 });
 
 export const fetchBooks = async (): Promise<Book[]> => {

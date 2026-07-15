@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState<"newest" | "oldest" | "title" | "author">("newest");
+  const [filterOption, setFilterOption] = useState<"all" | "newly_added" | "needs_verification">("all");
   const [books, setBooks] = useState<Book[]>([]);
   const [editingBook, setEditingBook] = useState<Book | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -24,7 +25,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, sortOption]);
+  }, [searchQuery, sortOption, filterOption]);
 
   let filteredBooks = books.filter(book => 
     (book.translatedTitle || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -32,6 +33,15 @@ export default function AdminDashboard() {
     (book.author || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
     (book.isbn || '').includes(searchQuery)
   );
+
+  if (filterOption === "newly_added") {
+    // Filter books added in the last 7 days
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    filteredBooks = filteredBooks.filter(book => book.createdAt && new Date(book.createdAt) > sevenDaysAgo);
+  } else if (filterOption === "needs_verification") {
+    filteredBooks = filteredBooks.filter(book => book.needsVerification);
+  }
 
   filteredBooks = filteredBooks.sort((a, b) => {
     switch (sortOption) {
@@ -234,7 +244,8 @@ export default function AdminDashboard() {
         city: editingBook.city,
         series: editingBook.series,
         size: editingBook.size,
-        categories: editingBook.categories
+        categories: editingBook.categories,
+        needs_verification: editingBook.needsVerification
       }).eq('id', editingBook.id);
 
       if (error) throw error;
@@ -250,35 +261,57 @@ export default function AdminDashboard() {
 
   return (
     <div className="p-8 md:p-12 relative">
-      <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-ink-900 pb-6">
-        <div>
-          <h1 className="font-serif text-4xl font-bold text-ink-900 mb-2">Painel de Controle</h1>
-          <p className="text-sm font-sans uppercase tracking-[0.2em] font-bold text-ink-600">Gestão do Acervo Literário</p>
+      <div className="mb-10 flex flex-col gap-6 border-b border-ink-900 pb-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div>
+            <h1 className="font-serif text-4xl font-bold text-ink-900 mb-2">Painel de Controle</h1>
+            <p className="text-sm font-sans uppercase tracking-[0.2em] font-bold text-ink-600">Gestão do Acervo Literário</p>
+          </div>
+          
+          <div className="w-full flex-col sm:flex-row flex md:max-w-xl gap-4 relative">
+            <div className="flex items-center flex-1">
+              <Search className="h-5 w-5 text-ink-600 mr-2" />
+              <input
+                type="text"
+                placeholder="Buscar no acervo..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bg-transparent w-full text-lg font-serif italic focus:outline-none placeholder:opacity-40 border-b border-ink-900 pb-1"
+              />
+            </div>
+            <div className="flex-shrink-0">
+               <select 
+                 value={sortOption}
+                 onChange={(e) => setSortOption(e.target.value as any)}
+                 className="bg-transparent border-b border-ink-900 py-1 font-serif text-ink-900 focus:outline-none cursor-pointer uppercase tracking-widest text-xs font-bold"
+               >
+                  <option value="newest">Mais Recentes</option>
+                  <option value="oldest">Mais Antigos</option>
+                  <option value="title">Título A-Z</option>
+                  <option value="author">Autor A-Z</option>
+               </select>
+            </div>
+          </div>
         </div>
-        
-        <div className="w-full flex-col sm:flex-row flex md:max-w-xl gap-4 relative">
-          <div className="flex items-center flex-1">
-            <Search className="h-5 w-5 text-ink-600 mr-2" />
-            <input
-              type="text"
-              placeholder="Buscar no acervo..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-transparent w-full text-lg font-serif italic focus:outline-none placeholder:opacity-40 border-b border-ink-900 pb-1"
-            />
-          </div>
-          <div className="flex-shrink-0">
-             <select 
-               value={sortOption}
-               onChange={(e) => setSortOption(e.target.value as any)}
-               className="bg-transparent border-b border-ink-900 py-1 font-serif text-ink-900 focus:outline-none cursor-pointer uppercase tracking-widest text-xs font-bold"
-             >
-                <option value="newest">Mais Recentes</option>
-                <option value="oldest">Mais Antigos</option>
-                <option value="title">Título A-Z</option>
-                <option value="author">Autor A-Z</option>
-             </select>
-          </div>
+        <div className="flex flex-wrap gap-2">
+          <button 
+            onClick={() => setFilterOption("all")}
+            className={`px-4 py-1.5 text-xs uppercase tracking-widest font-bold border transition-colors ${filterOption === "all" ? "bg-ink-900 text-white border-ink-900" : "bg-transparent text-ink-600 border-ink-300 hover:border-ink-900"}`}
+          >
+            Todos
+          </button>
+          <button 
+            onClick={() => setFilterOption("newly_added")}
+            className={`px-4 py-1.5 text-xs uppercase tracking-widest font-bold border transition-colors ${filterOption === "newly_added" ? "bg-ink-900 text-white border-ink-900" : "bg-transparent text-ink-600 border-ink-300 hover:border-ink-900"}`}
+          >
+            Recém Adicionados
+          </button>
+          <button 
+            onClick={() => setFilterOption("needs_verification")}
+            className={`px-4 py-1.5 text-xs uppercase tracking-widest font-bold border transition-colors ${filterOption === "needs_verification" ? "bg-terracotta-500 text-white border-terracotta-500" : "bg-transparent text-ink-600 border-ink-300 hover:border-ink-900"}`}
+          >
+            Para Verificar
+          </button>
         </div>
       </div>
 
@@ -298,7 +331,14 @@ export default function AdminDashboard() {
                 <tr key={book.id} className="hover:bg-sand-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
-                      <span className="font-serif font-bold text-ink-900 text-base">{book.translatedTitle || book.arabicTitle}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-serif font-bold text-ink-900 text-base">{book.translatedTitle || book.arabicTitle}</span>
+                        {book.needsVerification && (
+                          <span className="inline-block px-1.5 py-0.5 bg-terracotta-100 text-terracotta-600 border border-terracotta-200 text-[9px] uppercase tracking-wider font-bold whitespace-nowrap">
+                            Para Verificar
+                          </span>
+                        )}
+                      </div>
                       <span className="text-ink-600 text-xs mt-1">{book.author || book.authorArabic}</span>
                     </div>
                   </td>
@@ -507,8 +547,64 @@ export default function AdminDashboard() {
                   type="text" 
                   value={editingBook.coverImage || ''} 
                   onChange={e => setEditingBook({...editingBook, coverImage: e.target.value})}
-                  className="w-full bg-white border border-sand-300 px-3 py-2 text-sm focus:outline-none focus:border-terracotta-500"
+                  className="w-full bg-white border border-sand-300 px-3 py-2 text-sm focus:outline-none focus:border-terracotta-500 mb-2"
                 />
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  capture="environment"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    
+                    try {
+                      setIsSaving(true);
+                      const { default: imageCompression } = await import('browser-image-compression');
+                      const options = {
+                        maxSizeMB: 0.2,
+                        maxWidthOrHeight: 800,
+                        useWebWorker: true
+                      };
+                      const compressedFile = await imageCompression(file, options);
+                      
+                      const fileName = `thumb_${Date.now()}_${Math.random().toString(36).substring(7)}.jpg`;
+                      
+                      const { data, error } = await supabase.storage
+                        .from('book-thumbnails')
+                        .upload(fileName, compressedFile, {
+                          cacheControl: '3600',
+                          upsert: false
+                        });
+                        
+                      if (error) throw error;
+                      
+                      const { data: { publicUrl } } = supabase.storage
+                        .from('book-thumbnails')
+                        .getPublicUrl(fileName);
+                        
+                      setEditingBook({...editingBook, coverImage: publicUrl});
+                      alert("Imagem carregada com sucesso!");
+                    } catch (err: any) {
+                      console.error("Upload erro:", err);
+                      alert(`Erro ao fazer upload: ${err.message}. Verifique se o bucket 'book-thumbnails' existe no Supabase.`);
+                    } finally {
+                      setIsSaving(false);
+                    }
+                  }}
+                  className="w-full text-xs text-ink-600 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-xs file:font-bold file:bg-sand-200 file:text-ink-900 hover:file:bg-sand-300"
+                />
+              </div>
+
+              <div>
+                <label className="flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold text-ink-900 mb-1">
+                  <input 
+                    type="checkbox" 
+                    checked={editingBook.needsVerification || false}
+                    onChange={e => setEditingBook({...editingBook, needsVerification: e.target.checked})}
+                    className="accent-terracotta-500 h-4 w-4"
+                  />
+                  Marcado para Verificação
+                </label>
               </div>
 
               <div>

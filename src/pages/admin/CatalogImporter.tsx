@@ -266,7 +266,8 @@ export default function CatalogImporter() {
         series: r.series || "",
         size: r.size || "",
         categories: r.category ? r.category.split(",").map((c: string) => c.trim()).filter(Boolean) : [], 
-        synopsis: r.synopsis || r.originalText || ""
+        synopsis: r.synopsis || r.originalText || "",
+        needs_verification: true
       }));
 
       const { error } = await supabase.from('books').insert(payload);
@@ -454,6 +455,17 @@ export default function CatalogImporter() {
                            <label className="text-[10px] uppercase font-bold text-ink-600">Tamanho (cm)</label>
                            <input type="text" value={record.size || ''} onChange={e => handleRecordChange(record.id, 'size', e.target.value)} className="w-full border-b border-sand-300 pb-1 focus:border-terracotta-500 focus:outline-none" />
                         </div>
+                     </div>
+                     <div className="flex gap-4 items-end">
+                        <div className="flex-1">
+                           <label className="text-[10px] uppercase font-bold text-ink-600">URL da Capa</label>
+                           <input type="text" value={record.coverImage || ''} onChange={e => handleRecordChange(record.id, 'coverImage', e.target.value)} className="w-full border-b border-sand-300 pb-1 focus:border-terracotta-500 focus:outline-none" />
+                        </div>
+                        {record.coverImage && (
+                          <div className="w-12 h-16 bg-sand-200 border border-sand-300 overflow-hidden flex-shrink-0">
+                            <img src={record.coverImage} alt="Capa" className="w-full h-full object-cover" />
+                          </div>
+                        )}
                      </div>
                      <div>
                         <label className="text-[10px] uppercase font-bold text-ink-600">Texto Original</label>

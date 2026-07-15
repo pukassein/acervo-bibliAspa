@@ -88,11 +88,21 @@ export function AdminLayout() {
           })}
         </nav>
 
-        <div className="p-6 border-t border-white/10 mt-auto">
+        <div className="p-6 border-t border-white/10 mt-auto flex justify-between items-center">
           <div className="flex items-center gap-2 text-sand-300">
             <Settings className="h-4 w-4" />
             <span className="text-[10px] uppercase tracking-widest font-sans font-bold">Modo Mock Admin</span>
           </div>
+          <button 
+            onClick={() => {
+              sessionStorage.removeItem("adminLevel");
+              sessionStorage.removeItem("adminAuth");
+              setAdminLevel(null);
+            }}
+            className="text-[10px] uppercase tracking-widest font-bold text-terracotta-500 hover:text-white transition-colors"
+          >
+            Sair
+          </button>
         </div>
       </aside>
 
