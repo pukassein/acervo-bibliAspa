@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import { Book, fetchBooks } from "@/data/Books";
+import { Book, fetchBooks } from "@/data/books";
 import { ArrowLeft, BookOpen, Hash, MapPin, Tag } from "lucide-react";
 import { useEffect, useState } from "react";
 

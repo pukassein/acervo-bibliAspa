@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Book, fetchBooks } from "@/data/Books";
+import { Book, fetchBooks } from "@/data/books";
 import { Folder } from "lucide-react";
 import { useEffect, useState } from "react";
 

@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Book, searchBooks, fetchMetadata } from "@/data/Books";
+import { Book, searchBooks, fetchMetadata } from "@/data/books";
 import { BookCard } from "@/components/ui/BookCard";
 import { Search, Filter, X } from "lucide-react";
 import { cn } from "@/lib/utils";

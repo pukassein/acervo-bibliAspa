@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Book } from "@/data/Books";
+import { Book } from "@/data/books";
 import { cn } from "@/lib/utils";
 import { BookOpen } from "lucide-react";
 import React from "react";
