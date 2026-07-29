@@ -29,7 +29,10 @@ export function AdminLayout() {
   const navItems = [
     { name: "Painel Principal", href: "/admin", icon: LayoutDashboard },
     { name: "Adicionar Volume", href: "/admin/add-book", icon: PlusCircle },
-    ...(adminLevel === "full" ? [{ name: "Importar Catálogo", href: "/admin/import", icon: FileText }] : []),
+    ...(adminLevel === "full" ? [
+      { name: "Importar Catálogo (AI)", href: "/admin/import", icon: FileText },
+      { name: "Importar em Lote (Excel)", href: "/admin/bulk-import", icon: FileText }
+    ] : []),
     { name: "Imprimir Etiquetas", href: "/admin/print-labels", icon: Printer },
     { name: "Ver Acervo (Público)", href: "/browse", icon: Library },
   ];

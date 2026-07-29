@@ -90,16 +90,17 @@ export default function AdminPrintLabels() {
               }
               .label-card {
                  background-color: white !important;
+                 page-break-inside: avoid;
               }
               @page {
                 size: A4;
-                margin: 20mm;
+                margin: 10mm;
               }
             }
           `}
         </style>
         
-        <div className="mb-8 print:hidden flex justify-between items-center max-w-[210mm] mx-auto bg-sand-100 p-4 border border-sand-300">
+        <div className="mb-8 print:hidden flex justify-between items-center max-w-[190mm] mx-auto bg-sand-100 p-4 border border-sand-300">
           <button 
              onClick={() => setIsPrintMode(false)}
              className="border border-ink-900 px-6 py-2 text-xs font-bold uppercase tracking-widest hover:bg-white transition-colors"
@@ -115,26 +116,23 @@ export default function AdminPrintLabels() {
           </button>
         </div>
 
-        <div id="print-section" className="grid grid-cols-1 md:grid-cols-2 gap-8 gap-y-12 max-w-[210mm] mx-auto">
+        <div id="print-section" className="grid grid-cols-2 max-w-[190mm] mx-auto border-t border-l border-gray-400 border-dotted">
           {selectedBooksList.map((book) => (
-            <div key={book.id} className="label-card bg-white border border-gray-400 p-6 sm:p-8 w-full font-serif text-[12px] sm:text-[13px] leading-relaxed relative" style={{ maxWidth: "100%", height: "200px" }}>
-              <div className="mb-2">
-                {book.categories.join(" -- ")}
+            <div key={book.id} className="label-card bg-white border-b border-r border-gray-400 border-dotted p-6 font-serif text-[11px] leading-snug relative flex flex-col justify-center" style={{ height: "55.4mm", boxSizing: "border-box" }}>
+              <div className="mb-2 text-[12px]">
+                {book.categories[0] || "Sem Categoria"}
               </div>
-              <div className="mb-1 text-justify">
-                {book.author} ; {book.authorArabic}.
+              <div className="ml-0">
+                {book.author}{book.authorArabic ? `; ${book.authorArabic}` : ''}.
               </div>
-              <div className="font-bold inline">
-                {book.titleTransliteration}. 
+              <div className="font-bold text-[12px] mt-0.5">
+                {book.translatedTitle || book.titleTransliteration}. 
               </div>
-              <div className="inline">
-                {" "}-- {book.publisher}, {book.publicationYear}.
+              <div className="mt-0.5">
+                -- {book.publisher || "Editora"}, {book.publicationYear || "s.d."}.
               </div>
-              <div className="mt-2">
-                1 vol. ; 23 cm.
-              </div>
-              <div>
-                {book.pages} p.
+              <div className="mt-0.5">
+                {book.pages || "?"} p.; 21 cm.
               </div>
             </div>
           ))}

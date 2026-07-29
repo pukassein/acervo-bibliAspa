@@ -9,6 +9,7 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import AdminAddBook from "./pages/admin/AddBook";
 import AdminPrintLabels from "./pages/admin/PrintLabels";
 import CatalogImporter from "./pages/admin/CatalogImporter";
+import BulkImport from "./pages/admin/BulkImport";
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
           <Route path="add-book" element={<AdminAddBook />} />
           <Route path="print-labels" element={<AdminPrintLabels />} />
           <Route path="import" element={<CatalogImporter />} />
+          <Route path="bulk-import" element={<BulkImport />} />
         </Route>
       </Routes>
     </Router>
