@@ -16,29 +16,48 @@ export default function BulkImport() {
   const [isImporting, setIsImporting] = useState(false);
 
   const columnMapping: Record<string, string> = {
+    "título": "translated_title",
+    "titulo": "translated_title",
     "título em português": "translated_title",
+    "titulo em portugues": "translated_title",
+    "título pt": "translated_title",
+    "titulo pt": "translated_title",
     "título original": "arabic_title",
+    "titulo original": "arabic_title",
     "título original (árabe)": "arabic_title",
     "título em árabe": "arabic_title",
+    "titulo em arabe": "arabic_title",
+    "título árabe": "arabic_title",
+    "titulo arabe": "arabic_title",
     "autor (latim)": "author_latin",
     "autor em latim": "author_latin",
+    "autor latim": "author_latin",
     "autor": "author_latin",
     "autor (árabe)": "author_arabic",
     "autor em árabe": "author_arabic",
+    "autor arabe": "author_arabic",
+    "autor árabe": "author_arabic",
     "transliteração": "transliteration",
+    "transliteracao": "transliteration",
     "isbn": "isbn",
     "ano de publicação": "publication_year",
+    "ano de publicacao": "publication_year",
     "ano": "publication_year",
     "número de páginas": "pages",
+    "numero de paginas": "pages",
     "páginas": "pages",
+    "paginas": "pages",
     "editora": "publisher",
     "idioma": "language",
     "sinopse": "synopsis",
     "categorias (separadas por vírgula)": "categories",
     "categorias": "categories",
+    "categoria": "categories",
     "prateleira/localização": "shelf",
+    "prateleira/localizacao": "shelf",
     "prateleira": "shelf",
-    "localização": "shelf"
+    "localização": "shelf",
+    "localizacao": "shelf"
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -176,6 +195,30 @@ export default function BulkImport() {
       </div>
 
       <div className="bg-white border border-sand-300 p-8 flex flex-col items-center justify-center space-y-4 shadow-sm text-center">
+        <details className="w-full max-w-4xl mx-auto mb-6 bg-sand-50 border border-sand-200 text-left">
+          <summary className="p-4 cursor-pointer font-bold text-ink-900 text-sm uppercase tracking-widest hover:bg-sand-100 transition-colors">
+            Ver Cabeçalhos Aceitos
+          </summary>
+          <div className="p-4 border-t border-sand-200 text-sm text-sand-700 space-y-4">
+            <p>A primeira linha da sua planilha deve conter os cabeçalhos. Os nomes não diferenciam maiúsculas de minúsculas. Abaixo estão os nomes de colunas reconhecidos:</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+               <div><strong className="text-ink-900 block">Título em Português (Obrigatório)</strong>título, titulo, título em português</div>
+               <div><strong className="text-ink-900 block">Título Original (Obrigatório)</strong>título original, título árabe</div>
+               <div><strong className="text-ink-900 block">Autor Latim (Obrigatório)</strong>autor, autor (latim)</div>
+               <div><strong className="text-ink-900 block">Autor Árabe</strong>autor (árabe), autor em árabe</div>
+               <div><strong className="text-ink-900 block">Transliteração</strong>transliteração, transliteracao</div>
+               <div><strong className="text-ink-900 block">ISBN</strong>isbn</div>
+               <div><strong className="text-ink-900 block">Ano</strong>ano, ano de publicação</div>
+               <div><strong className="text-ink-900 block">Páginas</strong>páginas, paginas</div>
+               <div><strong className="text-ink-900 block">Editora</strong>editora</div>
+               <div><strong className="text-ink-900 block">Idioma</strong>idioma</div>
+               <div><strong className="text-ink-900 block">Categorias</strong>categorias, categoria</div>
+               <div><strong className="text-ink-900 block">Prateleira/Localização</strong>prateleira, localização, localizacao</div>
+               <div><strong className="text-ink-900 block">Sinopse</strong>sinopse</div>
+            </div>
+          </div>
+        </details>
+
         <div className="h-16 w-16 bg-sand-100 rounded-full flex items-center justify-center text-ink-900 mb-2">
           <FileSpreadsheet className="h-8 w-8" />
         </div>
@@ -249,12 +292,21 @@ export default function BulkImport() {
               <table className="w-full text-left text-sm font-sans">
                 <thead className="bg-sand-100 border-b border-sand-300">
                   <tr>
-                    <th className="px-4 py-3 font-bold text-ink-900 text-xs uppercase tracking-wider w-16">Linha</th>
-                    <th className="px-4 py-3 font-bold text-ink-900 text-xs uppercase tracking-wider w-24">Status</th>
-                    <th className="px-4 py-3 font-bold text-ink-900 text-xs uppercase tracking-wider">Título (PT)</th>
-                    <th className="px-4 py-3 font-bold text-ink-900 text-xs uppercase tracking-wider">Título (Original)</th>
-                    <th className="px-4 py-3 font-bold text-ink-900 text-xs uppercase tracking-wider">Autor</th>
-                    <th className="px-4 py-3 font-bold text-ink-900 text-xs uppercase tracking-wider">Detalhes</th>
+                    <th className="px-4 py-3 font-bold text-ink-900 text-xs uppercase tracking-wider w-16 whitespace-nowrap">Linha</th>
+                    <th className="px-4 py-3 font-bold text-ink-900 text-xs uppercase tracking-wider w-24 whitespace-nowrap">Status</th>
+                    <th className="px-4 py-3 font-bold text-ink-900 text-xs uppercase tracking-wider min-w-[200px]">Título (PT)</th>
+                    <th className="px-4 py-3 font-bold text-ink-900 text-xs uppercase tracking-wider min-w-[150px]">Título (Original)</th>
+                    <th className="px-4 py-3 font-bold text-ink-900 text-xs uppercase tracking-wider min-w-[150px]">Transliteração</th>
+                    <th className="px-4 py-3 font-bold text-ink-900 text-xs uppercase tracking-wider min-w-[150px]">Autor (Latim)</th>
+                    <th className="px-4 py-3 font-bold text-ink-900 text-xs uppercase tracking-wider min-w-[150px]">Autor (Árabe)</th>
+                    <th className="px-4 py-3 font-bold text-ink-900 text-xs uppercase tracking-wider min-w-[150px]">Editora</th>
+                    <th className="px-4 py-3 font-bold text-ink-900 text-xs uppercase tracking-wider whitespace-nowrap">Ano</th>
+                    <th className="px-4 py-3 font-bold text-ink-900 text-xs uppercase tracking-wider whitespace-nowrap">Páginas</th>
+                    <th className="px-4 py-3 font-bold text-ink-900 text-xs uppercase tracking-wider whitespace-nowrap">ISBN</th>
+                    <th className="px-4 py-3 font-bold text-ink-900 text-xs uppercase tracking-wider whitespace-nowrap">Idioma</th>
+                    <th className="px-4 py-3 font-bold text-ink-900 text-xs uppercase tracking-wider min-w-[150px]">Categorias</th>
+                    <th className="px-4 py-3 font-bold text-ink-900 text-xs uppercase tracking-wider whitespace-nowrap">Prateleira</th>
+                    <th className="px-4 py-3 font-bold text-ink-900 text-xs uppercase tracking-wider min-w-[200px]">Erros</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-sand-200">
@@ -262,9 +314,9 @@ export default function BulkImport() {
                     <tr key={row.index} className={row.status === 'invalid' ? 'bg-red-50/50' : row.status === 'imported' ? 'bg-blue-50/30' : ''}>
                       <td className="px-4 py-3 text-sand-500 font-mono text-xs">{row.index}</td>
                       <td className="px-4 py-3">
-                        {row.status === 'valid' && <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 text-[10px] uppercase font-bold tracking-wider rounded-full"><CheckCircle className="h-3 w-3 mr-1"/> Pronto</span>}
-                        {row.status === 'invalid' && <span className="inline-flex items-center px-2 py-1 bg-red-100 text-red-800 text-[10px] uppercase font-bold tracking-wider rounded-full"><XCircle className="h-3 w-3 mr-1"/> Erro</span>}
-                        {row.status === 'imported' && <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-[10px] uppercase font-bold tracking-wider rounded-full"><Database className="h-3 w-3 mr-1"/> Salvo</span>}
+                        {row.status === 'valid' && <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 text-[10px] uppercase font-bold tracking-wider rounded-full whitespace-nowrap"><CheckCircle className="h-3 w-3 mr-1"/> Pronto</span>}
+                        {row.status === 'invalid' && <span className="inline-flex items-center px-2 py-1 bg-red-100 text-red-800 text-[10px] uppercase font-bold tracking-wider rounded-full whitespace-nowrap"><XCircle className="h-3 w-3 mr-1"/> Erro</span>}
+                        {row.status === 'imported' && <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-[10px] uppercase font-bold tracking-wider rounded-full whitespace-nowrap"><Database className="h-3 w-3 mr-1"/> Salvo</span>}
                       </td>
                       <td className="px-4 py-3 font-medium text-ink-900">
                         {row.data.translated_title || <span className="text-red-400 italic">Vazio</span>}
@@ -273,19 +325,40 @@ export default function BulkImport() {
                         {row.data.arabic_title || <span className="text-red-400 italic">Vazio</span>}
                       </td>
                       <td className="px-4 py-3 text-sand-700">
+                        {row.data.transliteration}
+                      </td>
+                      <td className="px-4 py-3 text-sand-700">
                         {row.data.author_latin || <span className="text-red-400 italic">Vazio</span>}
                       </td>
+                      <td className="px-4 py-3 text-sand-700">
+                        {row.data.author_arabic}
+                      </td>
+                      <td className="px-4 py-3 text-sand-700">
+                        {row.data.publisher}
+                      </td>
+                      <td className="px-4 py-3 text-sand-700">
+                        {row.data.publication_year}
+                      </td>
+                      <td className="px-4 py-3 text-sand-700">
+                        {row.data.pages}
+                      </td>
+                      <td className="px-4 py-3 text-sand-700 whitespace-nowrap">
+                        {row.data.isbn}
+                      </td>
+                      <td className="px-4 py-3 text-sand-700">
+                        {row.data.language}
+                      </td>
+                      <td className="px-4 py-3 text-sand-700">
+                        {row.data.categories?.join(', ')}
+                      </td>
+                      <td className="px-4 py-3 text-sand-700">
+                        {row.data.shelf}
+                      </td>
                       <td className="px-4 py-3 text-xs text-sand-600">
-                        {row.status === 'invalid' ? (
+                        {row.status === 'invalid' && (
                           <ul className="list-disc pl-4 text-red-600">
                             {row.errors.map((err, i) => <li key={i}>{err}</li>)}
                           </ul>
-                        ) : (
-                          <div className="flex flex-wrap gap-1">
-                            {row.data.isbn && <span className="bg-sand-100 px-2 py-0.5 rounded">ISBN</span>}
-                            {row.data.publication_year && <span className="bg-sand-100 px-2 py-0.5 rounded">Ano</span>}
-                            {row.data.categories?.length > 0 && <span className="bg-sand-100 px-2 py-0.5 rounded">{row.data.categories.length} Cat</span>}
-                          </div>
                         )}
                       </td>
                     </tr>

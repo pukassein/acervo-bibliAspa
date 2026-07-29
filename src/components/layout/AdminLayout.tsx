@@ -94,7 +94,7 @@ export function AdminLayout() {
         <div className="p-6 border-t border-white/10 mt-auto flex justify-between items-center">
           <div className="flex items-center gap-2 text-sand-300">
             <Settings className="h-4 w-4" />
-            <span className="text-[10px] uppercase tracking-widest font-sans font-bold">Modo Mock Admin</span>
+            <span className="text-[10px] uppercase tracking-widest font-sans font-bold">Modo Admin</span>
           </div>
           <button 
             onClick={() => {

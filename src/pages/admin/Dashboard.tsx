@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Search, Edit, Trash2, MoreVertical, X, Save, Loader2, Wand2 } from "lucide-react";
-import { Book, fetchBooks } from "@/data/mockBooks";
+import { Book, fetchBooks } from "@/data/books";
 import { supabase } from "@/lib/supabase";
 
 export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState<"newest" | "oldest" | "title" | "author">("newest");
-  const [filterOption, setFilterOption] = useState<"all" | "newly_added" | "needs_verification">("all");
+  const [filterOption, setFilterOption] = useState<"all" | "newly_added" | "needs_verification" | "duplicates">("all");
   const [books, setBooks] = useState<Book[]>([]);
   const [editingBook, setEditingBook] = useState<Book | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -27,6 +27,18 @@ export default function AdminDashboard() {
     setCurrentPage(1);
   }, [searchQuery, sortOption, filterOption]);
 
+  const getDuplicateKey = (b: Book) => `${b.translatedTitle?.trim().toLowerCase()}|${b.author?.trim().toLowerCase()}`;
+
+  const duplicatesMap = new Map<string, number>();
+  books.forEach(b => {
+    const key = getDuplicateKey(b);
+    duplicatesMap.set(key, (duplicatesMap.get(key) || 0) + 1);
+  });
+
+  const checkIsDuplicate = (b: Book) => {
+    return duplicatesMap.get(getDuplicateKey(b))! > 1;
+  };
+
   let filteredBooks = books.filter(book => 
     (book.translatedTitle || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
     (book.arabicTitle || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -41,6 +53,8 @@ export default function AdminDashboard() {
     filteredBooks = filteredBooks.filter(book => book.createdAt && new Date(book.createdAt) > sevenDaysAgo);
   } else if (filterOption === "needs_verification") {
     filteredBooks = filteredBooks.filter(book => book.needsVerification);
+  } else if (filterOption === "duplicates") {
+    filteredBooks = filteredBooks.filter(book => checkIsDuplicate(book));
   }
 
   filteredBooks = filteredBooks.sort((a, b) => {
@@ -245,7 +259,9 @@ export default function AdminDashboard() {
         series: editingBook.series,
         size: editingBook.size,
         categories: editingBook.categories,
-        needs_verification: editingBook.needsVerification
+        needs_verification: editingBook.needsVerification,
+        bundle_id: editingBook.bundleId || null,
+        volume_number: editingBook.volumeNumber || null,
       }).eq('id', editingBook.id);
 
       if (error) throw error;
@@ -312,6 +328,12 @@ export default function AdminDashboard() {
           >
             Para Verificar
           </button>
+          <button 
+            onClick={() => setFilterOption("duplicates")}
+            className={`px-4 py-1.5 text-xs uppercase tracking-widest font-bold border transition-colors ${filterOption === "duplicates" ? "bg-ink-900 text-white border-ink-900" : "bg-transparent text-ink-600 border-ink-300 hover:border-ink-900"}`}
+          >
+            Duplicados
+          </button>
         </div>
       </div>
 
@@ -331,11 +353,26 @@ export default function AdminDashboard() {
                 <tr key={book.id} className="hover:bg-sand-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-serif font-bold text-ink-900 text-base">{book.translatedTitle || book.arabicTitle}</span>
                         {book.needsVerification && (
                           <span className="inline-block px-1.5 py-0.5 bg-terracotta-100 text-terracotta-600 border border-terracotta-200 text-[9px] uppercase tracking-wider font-bold whitespace-nowrap">
                             Para Verificar
+                          </span>
+                        )}
+                        {checkIsDuplicate(book) && (
+                          <span className="inline-block px-1.5 py-0.5 bg-yellow-100 text-yellow-800 border border-yellow-300 text-[9px] uppercase tracking-wider font-bold whitespace-nowrap" title="Pode haver outro livro com mesmo título e autor">
+                            Duplicado
+                          </span>
+                        )}
+                        {book.volumeNumber && (
+                          <span className="inline-block px-1.5 py-0.5 bg-blue-100 text-blue-800 border border-blue-300 text-[9px] uppercase tracking-wider font-bold whitespace-nowrap">
+                            Vol: {book.volumeNumber}
+                          </span>
+                        )}
+                        {book.bundleId && (
+                          <span className="inline-block px-1.5 py-0.5 bg-purple-100 text-purple-800 border border-purple-300 text-[9px] uppercase tracking-wider font-bold whitespace-nowrap" title="Faz parte de uma coleção/bundle">
+                            Bundle
                           </span>
                         )}
                       </div>
@@ -405,8 +442,23 @@ export default function AdminDashboard() {
       {editingBook && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/40 backdrop-blur-sm p-4">
           <div className="bg-sand-50 w-full max-w-4xl border border-sand-300 shadow-xl flex flex-col max-h-[90vh]">
-            <div className="p-4 md:p-6 border-b border-sand-300 flex justify-between items-center bg-white shrink-0">
-              <h2 className="font-serif text-xl md:text-2xl font-bold text-ink-900">Editar Volume</h2>
+            <div className="p-4 md:p-6 border-b border-sand-300 flex justify-between items-start bg-white shrink-0">
+              <div>
+                <h2 className="font-serif text-xl md:text-2xl font-bold text-ink-900 mb-1">Editar Volume</h2>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-ink-500 font-mono bg-sand-100 px-1.5 py-0.5 border border-sand-200">ID: {editingBook.id}</span>
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      navigator.clipboard.writeText(editingBook.id);
+                      alert("ID copiado!");
+                    }}
+                    className="text-[10px] uppercase font-bold text-ink-600 hover:text-ink-900 transition-colors"
+                  >
+                    Copiar ID
+                  </button>
+                </div>
+              </div>
               <button type="button" onClick={() => setEditingBook(null)} className="text-ink-600 hover:text-ink-900 transition-colors">
                 <X className="h-6 w-6" />
               </button>
@@ -536,6 +588,26 @@ export default function AdminDashboard() {
                     type="text" 
                     value={editingBook.isbn} 
                     onChange={e => setEditingBook({...editingBook, isbn: e.target.value})}
+                    className="w-full bg-white border border-sand-300 px-3 py-2 text-sm focus:outline-none focus:border-terracotta-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] uppercase tracking-widest font-bold text-ink-900 mb-1">ID do Bundle (Opcional)</label>
+                  <input 
+                    type="text" 
+                    value={editingBook.bundleId || ''} 
+                    onChange={e => setEditingBook({...editingBook, bundleId: e.target.value})}
+                    placeholder="Cole o ID de outro livro para agrupar"
+                    className="w-full bg-white border border-sand-300 px-3 py-2 text-sm focus:outline-none focus:border-terracotta-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] uppercase tracking-widest font-bold text-ink-900 mb-1">Volume/Parte (Opcional)</label>
+                  <input 
+                    type="text" 
+                    value={editingBook.volumeNumber || ''} 
+                    onChange={e => setEditingBook({...editingBook, volumeNumber: e.target.value})}
+                    placeholder="Ex: Vol 1, Parte 2"
                     className="w-full bg-white border border-sand-300 px-3 py-2 text-sm focus:outline-none focus:border-terracotta-500"
                   />
                 </div>
