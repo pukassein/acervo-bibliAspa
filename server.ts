@@ -4,11 +4,27 @@ import path from "path";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
 
+const requestCounts = new Map<string, { count: number; resetAt: number }>();
+function securityMiddleware(req: express.Request, res: express.Response, next: express.NextFunction) {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("Referrer-Policy", "no-referrer");
+  res.setHeader("X-Frame-Options", "DENY");
+  if (req.path.startsWith("/api/")) {
+    const now = Date.now();
+    const key = req.ip || "unknown";
+    const current = requestCounts.get(key);
+    if (!current || current.resetAt <= now) requestCounts.set(key, { count: 1, resetAt: now + 60_000 });
+    else if (++current.count > 30) return res.status(429).json({ error: "Too many requests" });
+  }
+  next();
+}
+
 async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  app.use(express.json());
+  app.use(express.json({ limit: "256kb" }));
+  app.use(securityMiddleware);
 
   // API route for complete book translation and transliteration
   app.post("/api/gemini/enrich-book", async (req, res) => {

@@ -628,6 +628,11 @@ export default function AdminDashboard() {
                   onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (!file) return;
+                    if (!file.type.startsWith('image/') || file.size > 5 * 1024 * 1024) {
+                      e.target.value = '';
+                      alert('Selecione uma imagem válida de até 5 MB.');
+                      return;
+                    }
                     
                     try {
                       setIsSaving(true);

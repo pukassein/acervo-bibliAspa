@@ -3,7 +3,19 @@ import { GoogleGenAI, Type } from "@google/genai";
 
 const app = express();
 
-app.use(express.json());
+const requestCounts = new Map<string, { count: number; resetAt: number }>();
+app.use((req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("Referrer-Policy", "no-referrer");
+  res.setHeader("X-Frame-Options", "DENY");
+  const now = Date.now();
+  const key = req.ip || "unknown";
+  const current = requestCounts.get(key);
+  if (!current || current.resetAt <= now) requestCounts.set(key, { count: 1, resetAt: now + 60_000 });
+  else if (++current.count > 30) return res.status(429).json({ error: "Too many requests" });
+  next();
+});
+app.use(express.json({ limit: "256kb" }));
 
 app.post("/api/gemini/enrich-book", async (req, res) => {
   try {
