@@ -53,8 +53,9 @@ export const mapSupabaseBook = (row: any): Book => ({
 const BOOK_LIST_FIELDS = 'id, arabic_title, transliteration, translated_title, author_latin, author_arabic, language, categories, cover_image, created_at';
 const BOOK_DETAIL_FIELDS = `${BOOK_LIST_FIELDS}, isbn, publication_year, pages, publisher, synopsis, shelf, city, series, size, needs_verification, bundle_id, volume_number`;
 
-export const fetchBooks = async (): Promise<Book[]> => {
-  const { data, error } = await supabase.from('books').select(BOOK_LIST_FIELDS).order('created_at', { ascending: false });
+export const fetchBooks = async (includeDetails = false): Promise<Book[]> => {
+  const fields = includeDetails ? BOOK_DETAIL_FIELDS : BOOK_LIST_FIELDS;
+  const { data, error } = await supabase.from('books').select(fields).order('created_at', { ascending: false });
   if (error) {
     console.error("Error fetching books:", error);
     return [];
@@ -140,4 +141,3 @@ export const searchBooks = async (params: {
     totalCount: count || 0 
   };
 };
-

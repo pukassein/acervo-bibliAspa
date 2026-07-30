@@ -16,7 +16,7 @@ export default function AdminPrintLabels() {
   const [customEndDate, setCustomEndDate] = useState("");
 
   useEffect(() => {
-    fetchBooks().then(setBooks);
+    fetchBooks(true).then(setBooks);
   }, []);
 
   const allCategories = useMemo(() => {

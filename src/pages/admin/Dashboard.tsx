@@ -21,7 +21,7 @@ export default function AdminDashboard() {
   const ITEMS_PER_PAGE = 20;
 
   useEffect(() => {
-    fetchBooks().then(setBooks);
+    fetchBooks(true).then(setBooks);
   }, []);
 
   useEffect(() => {
