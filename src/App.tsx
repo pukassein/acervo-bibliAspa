@@ -1,19 +1,21 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { lazy, Suspense } from "react";
 import { RootLayout } from "./components/layout/RootLayout";
 import { AdminLayout } from "./components/layout/AdminLayout";
 import Home from "./pages/Home";
 import Browse from "./pages/Browse";
-import BookDetails from "./pages/BookDetails";
-import Categories from "./pages/Categories";
-import AdminDashboard from "./pages/admin/Dashboard";
-import AdminAddBook from "./pages/admin/AddBook";
-import AdminPrintLabels from "./pages/admin/PrintLabels";
-import CatalogImporter from "./pages/admin/CatalogImporter";
-import BulkImport from "./pages/admin/BulkImport";
+const BookDetails = lazy(() => import("./pages/BookDetails"));
+const Categories = lazy(() => import("./pages/Categories"));
+const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
+const AdminAddBook = lazy(() => import("./pages/admin/AddBook"));
+const AdminPrintLabels = lazy(() => import("./pages/admin/PrintLabels"));
+const CatalogImporter = lazy(() => import("./pages/admin/CatalogImporter"));
+const BulkImport = lazy(() => import("./pages/admin/BulkImport"));
 
 export default function App() {
   return (
     <Router>
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center font-serif">Carregando...</div>}>
       <Routes>
         <Route path="/" element={<RootLayout />}>
           <Route index element={<Home />} />
@@ -30,6 +32,7 @@ export default function App() {
           <Route path="bulk-import" element={<BulkImport />} />
         </Route>
       </Routes>
+      </Suspense>
     </Router>
   );
 }

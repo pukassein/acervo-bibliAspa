@@ -50,13 +50,38 @@ export const mapSupabaseBook = (row: any): Book => ({
   volumeNumber: row.volume_number || "",
 });
 
+const BOOK_LIST_FIELDS = 'id, arabic_title, transliteration, translated_title, author_latin, author_arabic, language, categories, cover_image, created_at';
+const BOOK_DETAIL_FIELDS = `${BOOK_LIST_FIELDS}, isbn, publication_year, pages, publisher, synopsis, shelf, city, series, size, needs_verification, bundle_id, volume_number`;
+
 export const fetchBooks = async (): Promise<Book[]> => {
-  const { data, error } = await supabase.from('books').select('*').order('created_at', { ascending: false });
+  const { data, error } = await supabase.from('books').select(BOOK_LIST_FIELDS).order('created_at', { ascending: false });
   if (error) {
     console.error("Error fetching books:", error);
     return [];
   }
   return data.map(mapSupabaseBook);
+};
+
+export const fetchFeaturedBooks = async (): Promise<Book[]> => {
+  const { data, error } = await supabase.from('books').select(BOOK_LIST_FIELDS).order('created_at', { ascending: false }).limit(4);
+  if (error) { console.error("Error fetching featured books:", error); return []; }
+  return data.map(mapSupabaseBook);
+};
+
+export const fetchBookById = async (id: string): Promise<Book | null> => {
+  const { data, error } = await supabase.from('books').select(BOOK_DETAIL_FIELDS).eq('id', id).maybeSingle();
+  if (error) { console.error("Error fetching book:", error); return null; }
+  return data ? mapSupabaseBook(data) : null;
+};
+
+export const fetchSimilarBooks = async (book: Book): Promise<Book[]> => {
+  if (!book.categories.length) return [];
+  const { data, error } = await supabase.from('books').select(BOOK_LIST_FIELDS)
+    .overlaps('categories', book.categories).neq('id', book.id).limit(12);
+  if (error) { console.error("Error fetching similar books:", error); return []; }
+  return data.map(mapSupabaseBook).sort((a, b) =>
+    b.categories.filter(c => book.categories.includes(c)).length - a.categories.filter(c => book.categories.includes(c)).length
+  ).slice(0, 4);
 };
 
 export const fetchMetadata = async () => {
@@ -83,7 +108,7 @@ export const searchBooks = async (params: {
 }): Promise<{ books: Book[], totalCount: number }> => {
   const { page, limit, searchQuery, categories, language } = params;
 
-  let query = supabase.from('books').select('*', { count: 'exact' });
+  let query = supabase.from('books').select(BOOK_LIST_FIELDS, { count: 'exact' });
 
   if (language && language !== 'All') {
     query = query.eq('language', language);
@@ -115,5 +140,4 @@ export const searchBooks = async (params: {
     totalCount: count || 0 
   };
 };
-
 

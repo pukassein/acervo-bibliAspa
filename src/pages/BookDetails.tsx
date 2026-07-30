@@ -1,34 +1,23 @@
 import { Link, useParams } from "react-router-dom";
-import { Book, fetchBooks } from "@/data/books";
+import { Book, fetchBookById, fetchSimilarBooks } from "@/data/books";
 import { ArrowLeft, BookOpen, Hash, MapPin, Tag } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function BookDetails() {
   const { id } = useParams();
   const [book, setBook] = useState<Book | null>(null);
-  const [allBooks, setAllBooks] = useState<Book[]>([]);
+  const [similarBooks, setSimilarBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    fetchBooks().then(books => {
-      setAllBooks(books);
-      const found = books.find((b) => b.id === id);
-      setBook(found || null);
+    if (!id) { setLoading(false); return; }
+    fetchBookById(id).then(async (found) => {
+      setBook(found);
+      if (found) setSimilarBooks(await fetchSimilarBooks(found));
       setLoading(false);
     });
   }, [id]);
-
-  const similarBooks = book ? allBooks
-    .filter(b => b.id !== book.id)
-    .map(b => {
-      const commonTags = b.categories.filter(c => book.categories.includes(c));
-      return { book: b, common: commonTags.length };
-    })
-    .filter(x => x.common > 0)
-    .sort((a, b) => b.common - a.common)
-    .map(x => x.book)
-    .slice(0, 4) : [];
 
   if (loading) {
     return (
@@ -71,7 +60,7 @@ export default function BookDetails() {
               </div>
               {book.coverImage && (
                 <div className="w-48 sm:w-64 flex-shrink-0">
-                  <img src={book.coverImage} alt={`Capa do livro ${book.translatedTitle}`} className="w-full h-auto object-cover border-4 border-sand-200 shadow-sm" referrerPolicy="no-referrer" />
+                  <img src={book.coverImage} alt={`Capa do livro ${book.translatedTitle}`} className="w-full h-auto object-cover border-4 border-sand-200 shadow-sm" referrerPolicy="no-referrer" width="256" height="384" decoding="async" />
                 </div>
               )}
             </div>
@@ -153,7 +142,7 @@ export default function BookDetails() {
                  <Link key={sim.id} to={`/book/${sim.id}`} className="group relative block">
                    <div className="aspect-[2/3] w-full bg-sand-200 border border-sand-300 relative mx-auto shadow-sm overflow-hidden mb-4">
                      {sim.coverImage ? (
-                       <img src={sim.coverImage} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="Capa" referrerPolicy="no-referrer" />
+                       <img src={sim.coverImage} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="Capa" referrerPolicy="no-referrer" loading="lazy" width="160" height="240" decoding="async" />
                      ) : (
                        <div className="absolute inset-0 flex items-center justify-center p-4">
                          <span className="font-arabic text-2xl opacity-20" dir="rtl">{sim.arabicTitle}</span>

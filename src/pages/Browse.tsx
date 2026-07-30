@@ -13,6 +13,7 @@ export default function Browse() {
   const [loading, setLoading] = useState(true);
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("All");
   const [showTags, setShowTags] = useState(false);
@@ -24,6 +25,11 @@ export default function Browse() {
   const [mainCategories, setMainCategories] = useState<string[]>([]);
   const [allTags, setAllTags] = useState<string[]>([]);
   const [languages, setLanguages] = useState<string[]>(["All"]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedSearchQuery(searchQuery.trim()), 350);
+    return () => window.clearTimeout(timer);
+  }, [searchQuery]);
 
   // Fetch metadata once
   useEffect(() => {
@@ -47,14 +53,14 @@ export default function Browse() {
     const { books: fetchedBooks, totalCount: fetchedTotal } = await searchBooks({
       page: currentPage,
       limit: booksPerPage,
-      searchQuery,
+      searchQuery: debouncedSearchQuery,
       categories: selectedCategories,
       language: selectedLanguage
     });
     setBooks(fetchedBooks);
     setTotalCount(fetchedTotal);
     setLoading(false);
-  }, [currentPage, booksPerPage, searchQuery, selectedCategories, selectedLanguage]);
+  }, [currentPage, booksPerPage, debouncedSearchQuery, selectedCategories, selectedLanguage]);
 
   useEffect(() => {
     loadBooks();
@@ -63,7 +69,7 @@ export default function Browse() {
   // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, selectedCategories, selectedLanguage]);
+  }, [debouncedSearchQuery, selectedCategories, selectedLanguage]);
 
   const totalPages = Math.ceil(totalCount / booksPerPage);
 

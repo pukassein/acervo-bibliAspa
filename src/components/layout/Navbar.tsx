@@ -17,7 +17,7 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b border-sand-300 bg-sand-100">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link to="/" className="flex items-center space-x-3 transition-opacity hover:opacity-80">
-          <img src="https://jvfruuneqfgqvdztspid.supabase.co/storage/v1/object/public/images/bibliaspa%20logo.jpg" alt="BibliASPA Logo" className="h-10 w-auto mix-blend-multiply" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+          <img src="https://jvfruuneqfgqvdztspid.supabase.co/storage/v1/object/public/images/bibliaspa%20logo.jpg" alt="BibliASPA Logo" className="h-10 w-auto mix-blend-multiply" width="160" height="80" decoding="async" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
           <div className="flex items-baseline space-x-3">
              <span className="text-2xl font-bold tracking-tighter uppercase text-ink-900 font-serif">BibliASPA</span>
              <span className="text-xs uppercase tracking-widest text-terracotta-500 border-l border-sand-300 pl-3">Acervo Literário</span>

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Book, fetchBooks } from "@/data/books";
+import { Book, fetchFeaturedBooks } from "@/data/books";
 import { BookCard } from "@/components/ui/BookCard";
 import { ArrowRight, Search } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -8,7 +8,7 @@ export default function Home() {
   const [featuredBooks, setFeaturedBooks] = useState<Book[]>([]);
 
   useEffect(() => {
-    fetchBooks().then(books => setFeaturedBooks(books.slice(0, 4)));
+    fetchFeaturedBooks().then(setFeaturedBooks);
   }, []);
 
   return (
@@ -20,6 +20,9 @@ export default function Home() {
                src="https://jvfruuneqfgqvdztspid.supabase.co/storage/v1/object/public/images/bibliaspa%20logo.jpg" 
                alt="" 
                className="w-full h-full object-cover sm:object-contain sm:w-2/3 mix-blend-multiply" 
+               width="800"
+               height="600"
+               decoding="async"
             />
         </div>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center relative z-10">
