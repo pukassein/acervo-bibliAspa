@@ -22,6 +22,8 @@ export default function BulkImport() {
     "titulo em portugues": "translated_title",
     "título pt": "translated_title",
     "titulo pt": "translated_title",
+    "título português": "translated_title",
+    "titulo português": "translated_title",
     "título original": "arabic_title",
     "titulo original": "arabic_title",
     "título original (árabe)": "arabic_title",
@@ -42,14 +44,20 @@ export default function BulkImport() {
     "isbn": "isbn",
     "ano de publicação": "publication_year",
     "ano de publicacao": "publication_year",
+    "ano publicação": "publication_year",
+    "ano publicacao": "publication_year",
     "ano": "publication_year",
     "número de páginas": "pages",
     "numero de paginas": "pages",
     "páginas": "pages",
     "paginas": "pages",
+    "página": "pages",
+    "pagina": "pages",
     "editora": "publisher",
+    "publisher": "publisher",
     "idioma": "language",
     "sinopse": "synopsis",
+    "synopsis": "synopsis",
     "categorias (separadas por vírgula)": "categories",
     "categorias": "categories",
     "categoria": "categories",
@@ -59,6 +67,21 @@ export default function BulkImport() {
     "localização": "shelf",
     "localizacao": "shelf"
   };
+
+  // Excel headers often contain accents, non-breaking spaces or invisible BOM
+  // characters. Normalize both the mapping and the incoming header before lookup.
+  const normalizeHeader = (value: unknown) => String(value ?? "")
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[–—]/g, "-")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const normalizedColumnMapping = Object.fromEntries(
+    Object.entries(columnMapping).map(([key, value]) => [normalizeHeader(key), value])
+  );
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -88,8 +111,8 @@ export default function BulkImport() {
         
         // Map columns
         for (const key in row) {
-          const normalizedKey = key.trim().toLowerCase();
-          const dbField = columnMapping[normalizedKey] || null;
+          const normalizedKey = normalizeHeader(key);
+          const dbField = normalizedColumnMapping[normalizedKey] || null;
           if (dbField) {
             normalizedData[dbField] = row[key];
           }
