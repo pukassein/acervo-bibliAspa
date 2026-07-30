@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Search, Edit, Trash2, MoreVertical, X, Save, Loader2, Wand2 } from "lucide-react";
+import { Search, Edit, Trash2, MoreVertical, X, Save, Loader2, Wand2, CheckSquare, Square } from "lucide-react";
 import { Book, fetchBooks } from "@/data/books";
 import { supabase } from "@/lib/supabase";
 
@@ -15,6 +15,7 @@ export default function AdminDashboard() {
   const [apiResults, setApiResults] = useState<any[]>([]);
   const [showApiModal, setShowApiModal] = useState(false);
   const [isEnrichingAi, setIsEnrichingAi] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [currentPage, setCurrentPage] = useState(1);
   const adminLevel = sessionStorage.getItem("adminLevel");
   const ITEMS_PER_PAGE = 20;
@@ -27,7 +28,17 @@ export default function AdminDashboard() {
     setCurrentPage(1);
   }, [searchQuery, sortOption, filterOption]);
 
-  const getDuplicateKey = (b: Book) => `${b.translatedTitle?.trim().toLowerCase()}|${b.author?.trim().toLowerCase()}`;
+  const getDuplicateKey = (b: Book) => {
+    const title = (b.translatedTitle || b.arabicTitle || '').trim().toLowerCase();
+    const author = (b.author || b.authorArabic || '').trim().toLowerCase();
+    return title || author ? `${title}|${author}` : b.id;
+  };
+
+  const getCompleteness = (b: Book) => [
+    b.arabicTitle, b.titleTransliteration, b.translatedTitle, b.author, b.authorArabic,
+    b.language, b.publicationYear, b.publisher, b.isbn, b.pages, b.description,
+    b.categories?.length, b.shelf, b.coverImage, b.city, b.series, b.size, b.volumeNumber
+  ].filter(value => value !== undefined && value !== null && value !== '' && value !== 0).length;
 
   const duplicatesMap = new Map<string, number>();
   books.forEach(b => {
@@ -37,6 +48,12 @@ export default function AdminDashboard() {
 
   const checkIsDuplicate = (b: Book) => {
     return duplicatesMap.get(getDuplicateKey(b))! > 1;
+  };
+
+  const isLessCompleteDuplicate = (b: Book) => {
+    if (!checkIsDuplicate(b)) return false;
+    const group = books.filter(other => getDuplicateKey(other) === getDuplicateKey(b));
+    return getCompleteness(b) < Math.max(...group.map(getCompleteness));
   };
 
   let filteredBooks = books.filter(book => 
@@ -83,7 +100,34 @@ export default function AdminDashboard() {
         return;
       }
       setBooks(books.filter(b => b.id !== id));
+      setSelectedIds(prev => { const next = new Set(prev); next.delete(id); return next; });
     }
+  };
+
+  const toggleSelected = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleAllVisible = () => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      const allSelected = paginatedBooks.length > 0 && paginatedBooks.every(book => next.has(book.id));
+      paginatedBooks.forEach(book => allSelected ? next.delete(book.id) : next.add(book.id));
+      return next;
+    });
+  };
+
+  const handleBulkDelete = async () => {
+    const ids = Array.from(selectedIds);
+    if (!ids.length || !confirm(`Excluir ${ids.length} volume(s) selecionado(s)? Esta ação não pode ser desfeita.`)) return;
+    const { error } = await supabase.from('books').delete().in('id', ids);
+    if (error) { alert(`Erro ao deletar: ${error.message}`); return; }
+    setBooks(prev => prev.filter(book => !selectedIds.has(book.id)));
+    setSelectedIds(new Set());
   };
 
   const handleAIEnrich = async () => {
@@ -337,11 +381,35 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3 text-xs text-ink-600 font-sans">
+          <button
+            onClick={toggleAllVisible}
+            className="inline-flex items-center gap-2 px-3 py-2 border border-sand-300 hover:border-ink-900 text-ink-900 uppercase tracking-widest font-bold"
+            title="Selecionar ou desselecionar os volumes desta página"
+          >
+            {paginatedBooks.length > 0 && paginatedBooks.every(book => selectedIds.has(book.id))
+              ? <CheckSquare className="h-4 w-4" />
+              : <Square className="h-4 w-4" />}
+            Selecionar página
+          </button>
+          <span>{selectedIds.size} selecionado(s)</span>
+        </div>
+        <button
+          onClick={handleBulkDelete}
+          disabled={selectedIds.size === 0}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-terracotta-500 text-white uppercase tracking-widest text-xs font-bold disabled:opacity-30 disabled:cursor-not-allowed hover:bg-terracotta-600"
+        >
+          <Trash2 className="h-4 w-4" /> Excluir selecionados
+        </button>
+      </div>
+
       <div className="bg-white border border-sand-300 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm font-sans">
             <thead className="bg-sand-200 text-ink-900 text-[10px] uppercase tracking-widest border-b border-sand-300">
               <tr>
+                <th className="px-6 py-4 font-bold w-12">Selecionar</th>
                 <th className="px-6 py-4 font-bold">Título / Autor</th>
                 <th className="px-6 py-4 font-bold">Data de Adição</th>
                 <th className="px-6 py-4 font-bold">Idioma</th>
@@ -350,7 +418,12 @@ export default function AdminDashboard() {
             </thead>
             <tbody className="divide-y divide-sand-200">
               {paginatedBooks.map((book) => (
-                <tr key={book.id} className="hover:bg-sand-50 transition-colors">
+                <tr key={book.id} className={`hover:bg-sand-50 transition-colors ${selectedIds.has(book.id) ? 'bg-sand-50' : ''}`}>
+                  <td className="px-6 py-4">
+                    <button onClick={() => toggleSelected(book.id)} title={selectedIds.has(book.id) ? "Desselecionar" : "Selecionar"}>
+                      {selectedIds.has(book.id) ? <CheckSquare className="h-5 w-5 text-ink-900" /> : <Square className="h-5 w-5 text-ink-400" />}
+                    </button>
+                  </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
                       <div className="flex items-center gap-2 flex-wrap">
@@ -363,6 +436,11 @@ export default function AdminDashboard() {
                         {checkIsDuplicate(book) && (
                           <span className="inline-block px-1.5 py-0.5 bg-yellow-100 text-yellow-800 border border-yellow-300 text-[9px] uppercase tracking-wider font-bold whitespace-nowrap" title="Pode haver outro livro com mesmo título e autor">
                             Duplicado
+                          </span>
+                        )}
+                        {isLessCompleteDuplicate(book) && (
+                          <span className="inline-block px-1.5 py-0.5 bg-red-100 text-red-700 border border-red-200 text-[9px] uppercase tracking-wider font-bold whitespace-nowrap" title={`Registro menos completo (${getCompleteness(book)} campos preenchidos)`}>
+                            Menos completo
                           </span>
                         )}
                         {book.volumeNumber && (
@@ -407,7 +485,7 @@ export default function AdminDashboard() {
               ))}
               {paginatedBooks.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-ink-600 font-serif italic text-lg bg-sand-100">
+                  <td colSpan={5} className="px-6 py-12 text-center text-ink-600 font-serif italic text-lg bg-sand-100">
                     Nenhum volume encontrado.
                   </td>
                 </tr>
