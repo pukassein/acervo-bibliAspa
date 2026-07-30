@@ -142,6 +142,11 @@ export default function AdminPrintLabels() {
               }
               #print-container, #print-container * {
                 visibility: visible;
+                color: #000 !important;
+                background: #fff !important;
+                border-color: #000 !important;
+                box-shadow: none !important;
+                text-shadow: none !important;
               }
               #print-container {
                 position: absolute;
@@ -160,6 +165,11 @@ export default function AdminPrintLabels() {
                 --page-padding: 0 !important;
                 box-shadow: none !important;
                 margin-bottom: 0 !important;
+              }
+              .print-page > div {
+                color: #000 !important;
+                background: #fff !important;
+                border-color: #000 !important;
               }
             }
           `}
