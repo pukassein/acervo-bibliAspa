@@ -17,7 +17,7 @@ export function AdminLayout() {
       setAdminLevel("full");
       sessionStorage.setItem("adminLevel", "full");
       sessionStorage.setItem("adminAuth", "true");
-    } else if (password === "bibliaspaadmin") {
+    } else if (password === "bibliaspaadmin" || password === "lorenaadmin") {
       setAdminLevel("normal");
       sessionStorage.setItem("adminLevel", "normal");
       sessionStorage.setItem("adminAuth", "true");
