@@ -8,6 +8,8 @@ export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState<"newest" | "oldest" | "title" | "author">("newest");
   const [filterOption, setFilterOption] = useState<"all" | "newly_added" | "needs_verification" | "duplicates">("all");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [languageFilter, setLanguageFilter] = useState("");
   const [books, setBooks] = useState<Book[]>([]);
   const [editingBook, setEditingBook] = useState<Book | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -26,7 +28,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, sortOption, filterOption]);
+  }, [searchQuery, sortOption, filterOption, categoryFilter, languageFilter]);
 
   const getDuplicateKey = (b: Book) => {
     const title = (b.translatedTitle || b.arabicTitle || '').trim().toLowerCase();
@@ -56,12 +58,28 @@ export default function AdminDashboard() {
     return getCompleteness(b) < Math.max(...group.map(getCompleteness));
   };
 
+  const availableCategories: string[] = Array.from(new Set(
+    books.flatMap(book => book.categories || []).map(category => category.trim()).filter(Boolean)
+  )).sort((a, b) => String(a).localeCompare(String(b), 'pt-BR')) as string[];
+  const availableLanguages = Array.from(new Set(
+    books.map(book => book.language?.trim()).filter(Boolean) as string[]
+  )).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
   let filteredBooks = books.filter(book => 
     (book.translatedTitle || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
     (book.arabicTitle || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
     (book.author || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
     (book.isbn || '').includes(searchQuery)
   );
+
+  if (categoryFilter) {
+    filteredBooks = filteredBooks.filter(book =>
+      (book.categories || []).some(category => category.trim() === categoryFilter)
+    );
+  }
+  if (languageFilter) {
+    filteredBooks = filteredBooks.filter(book => book.language === languageFilter);
+  }
 
   if (filterOption === "newly_added") {
     // Filter books added in the last 7 days
@@ -378,6 +396,36 @@ export default function AdminDashboard() {
           >
             Duplicados
           </button>
+        </div>
+        <div className="flex flex-wrap items-center gap-3 pt-1">
+          <label className="text-[10px] uppercase tracking-widest font-bold text-ink-600">Filtrar por:</label>
+          <select
+            value={categoryFilter}
+            onChange={e => setCategoryFilter(e.target.value)}
+            className="bg-white border border-sand-300 px-3 py-2 text-xs font-bold text-ink-900 focus:outline-none focus:border-ink-900"
+            aria-label="Filtrar por categoria"
+          >
+            <option value="">Todas as categorias</option>
+            {availableCategories.map(category => <option key={category} value={category}>{category}</option>)}
+          </select>
+          <select
+            value={languageFilter}
+            onChange={e => setLanguageFilter(e.target.value)}
+            className="bg-white border border-sand-300 px-3 py-2 text-xs font-bold text-ink-900 focus:outline-none focus:border-ink-900"
+            aria-label="Filtrar por idioma"
+          >
+            <option value="">Todos os idiomas</option>
+            {availableLanguages.map(language => <option key={language} value={language}>{language}</option>)}
+          </select>
+          {(categoryFilter || languageFilter || filterOption !== "all" || searchQuery) && (
+            <button
+              type="button"
+              onClick={() => { setCategoryFilter(""); setLanguageFilter(""); setFilterOption("all"); setSearchQuery(""); }}
+              className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest font-bold text-terracotta-500 hover:text-ink-900"
+            >
+              <X className="h-3.5 w-3.5" /> Limpar filtros
+            </button>
+          )}
         </div>
       </div>
 
